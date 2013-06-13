@@ -1,0 +1,71 @@
+% The CTC saga: C2 comparison
+% Stelios Sfakianakis
+% Date: 2013/03/15
+
+
+```{r setup, include=FALSE, cache=FALSE}
+opts_chunk$set(tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60), dpi=200, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+```
+
+We are using the following datasets:
+
+- [GSE27562](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27562): "In total, we collected blood from 57 women with a diagnosis of breast cancer and 37 with a benign diagnosis"  (PMID: [21781289](http://www.ncbi.nlm.nih.gov/pubmed/21781289)) Platform: Affymetrix 
+
+- [GSE16443](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16443): "Diagnostic work-up revealed that 67 of these women had breast cancer while 54 had no malignant disease. Additionally, 9 samples from 6 healthy female controls (three pregnant women, one breast-feeding woman and two healthy controls at different timepoints in their menstrual cycle) were included." (PMID: [20078854](http://www.ncbi.nlm.nih.gov/pubmed/20078854)). Platform: Applied Biosystems (ABI) 
+
+
+Loading the data and performing the merge:
+```{r load, cache=TRUE, message=FALSE}
+require(inSilicoMerging)
+require(siggenes)
+
+load("data/gse27562.rda")
+load("data/gse16443.rda")
+datasets = list(GSE27562=gse27562, GSE16443=gse16443)
+mgse_COMBAT <- merge(datasets, method="COMBAT");
+```
+
+
+We select the samples to be used for this comparison:
+```{r samplesel, cache=TRUE,  message=FALSE}
+ind <- gse27562$characteristics_ch1=='phenotype: Normal' | gse27562$characteristics_ch1=='phenotype: Malignant' | gse27562$characteristics_ch1=='phenotype: Pre-Surgery (aka Malignant)'
+gse27562_samples = sampleNames(gse27562[,ind])
+gse16443_samples = sampleNames(gse16443)
+
+samples = c(gse16443_samples, gse27562_samples)
+c2.data = mgse_COMBAT[,samples]
+```
+
+The distribution of the samples is shown in Table 1.
+```{r xtable, results="asis"}
+require(xtable)
+print(xtable(table(c2.data$Disease, c2.data$Study), caption="Sample distribution", label="fig:dist"))
+```
+
+```{r plot, echo=TRUE, cache=TRUE, fig.cap="MDS plot of the merged samples", dev="pdf"}
+require(inSilicoMerging)
+plotMDS(c2.data, "Study", "Disease")
+```
+
+```{r diff, cache=TRUE}
+cl = ifelse(c2.data$Disease == 'Control', 0, 1)
+sam.out <- sam(exprs(c2.data), cl, B=500, rand=0xDEAD);
+summary(sam.out);
+findDelta(sam.out, fdr=0.05);
+delta <- findDelta(sam.out, fdr=0.05, verbose=FALSE)[2,1]
+sam.sum <- summary(sam.out, delta)
+
+w <- which(sam.sum@mat.sig$d.value > 0)
+num.genes.over <- length(w)
+```
+
+So we find `r num.genes.over` genes overexpressed in cancer peripheral blood.
+
+```{r siggenes, cache=TRUE}
+siggenes.all <- list.siggenes(sam.out, delta)
+siggenes.over <- list.siggenes(sam.out, delta)[w]
+
+ee=exprs(c2.data)[sam.sum@row.sig.genes,]
+dim(ee)
+```
+
