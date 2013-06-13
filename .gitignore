@@ -1,6 +1,7 @@
 # History files
 .Rhistory
 
+# knitr cache files
 cache/*
 
 # Example code in package build process

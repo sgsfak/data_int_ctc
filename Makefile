@@ -8,7 +8,7 @@ $(GSE): download_files
 	
 .SECONDARY: download_files
 download_files:
-	Rscript --vanilla R/get_data.R
+	Rscript --vanilla -e 'source("R/get_data.R");get_data()'
 
 .SUFFIXES: .pdf .md
 .md.pdf:

@@ -18,6 +18,7 @@ Loading the data and performing the merge:
 ```{r load, cache=TRUE, message=FALSE}
 require(inSilicoMerging)
 require(siggenes)
+require(xtable)
 
 load("data/gse27562_c2.rda")
 load("data/gse16443.rda")
@@ -38,9 +39,10 @@ c2.data = mgse_COMBAT[,samples]
 
 The distribution of the samples is shown in Table 1.
 ```{r xtable, echo=FALSE, results="asis"}
-require(xtable)
-print(xtable(table(c2.data$Disease, c2.data$Study), caption="Sample distribution", label="fig:dist"))
+print.xtable(xtable(table(c2.data$Disease, c2.data$Study), caption="Sample distribution", label="tab:dist"), comment=FALSE)
 ```
+
+And the distribution of samples in a 2D MDS plot are shown in Figure 1.
 
 ```{r plot, echo=TRUE, cache=TRUE, fig.cap="MDS plot of the merged samples", dev="pdf"}
 plotMDS(c2.data, "Study", "Disease")
@@ -50,7 +52,6 @@ plotMDS(c2.data, "Study", "Disease")
 cl = ifelse(c2.data$Disease == 'Control', 0, 1)
 sam.out <- sam(exprs(c2.data), cl, B=500, rand=0xDEAD);
 summary(sam.out);
-findDelta(sam.out, fdr=0.05);
 delta <- findDelta(sam.out, fdr=0.05, verbose=FALSE)[2,1]
 sam.sum <- summary(sam.out, delta)
 
