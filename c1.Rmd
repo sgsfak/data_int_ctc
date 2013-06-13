@@ -4,7 +4,7 @@
 
 
 ```{r setup, include=FALSE, cache=FALSE}
-opts_chunk$set(dpi=200, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+opts_chunk$set(dpi=200, warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
 require(siggenes)
 require(inSilicoMerging)
 require(plyr)
@@ -68,7 +68,7 @@ The distribution of the different classes in the initial datasets is shown in th
 table:
 
 ```{r distr, results="asis", echo=FALSE}
-xtable(table(mgse_COMBAT$Disease, mgse_COMBAT$Study))
+print.xtable(xtable(table(mgse_COMBAT$Disease, mgse_COMBAT$Study)), comment=FALSE)
 ```
 
 For each dataset we keep specific samples in the final (merged) dataset.
@@ -96,7 +96,7 @@ c1.data = mgse_COMBAT[,samples]
 After the selection of samples their distribution is as follows:
 
 ```{r distr2, results="asis", echo=FALSE}
-xtable(table(c1.data$Disease, c1.data$Study))
+print.xtable(xtable(table(c1.data$Disease, c1.data$Study)), comment=FALSE)
 ```
 
 We can compare the output (how the different data sets are mixed together) by computing a [Multidimensional Scaling](http://en.wikipedia.org/wiki/Multidimensional_scaling) (MDS) plot for the 3 methods used:

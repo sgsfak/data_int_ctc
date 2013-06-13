@@ -14,5 +14,5 @@ download_files:
 .md.pdf:
 	pandoc --latex-engine=/usr/texbin/pdflatex -s $< -o $@
 
-%.md : %.Rmd $(GSE)
+%.md : %.Rmd
 	Rscript -e "library(knitr); knit(\"$<\")"

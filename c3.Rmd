@@ -4,7 +4,7 @@
 
 
 ```{r setup, include=FALSE, cache=FALSE}
-opts_chunk$set(dpi=200, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+    opts_chunk$set(dpi=200, warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
 require(siggenes)
 require(inSilicoMerging)
 require(xtable)
@@ -28,14 +28,14 @@ For the normal blood samples we are using the ones from (my) c2 comparison, that
 - [GSE27562](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27562): "In total, we collected blood from 57 women with a diagnosis of breast cancer and 37 with a benign diagnosis"  (PMID: [21781289](http://www.ncbi.nlm.nih.gov/pubmed/21781289)) Platform: Affymetrix : **31 normal blood samples**
 - [GSE16443](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16443): "Diagnostic work-up revealed that 67 of these women had breast cancer while 54 had no malignant disease. Additionally, 9 samples from 6 healthy female controls (three pregnant women, one breast-feeding woman and two healthy controls at different timepoints in their menstrual cycle) were included." (PMID: [20078854](http://www.ncbi.nlm.nih.gov/pubmed/20078854)). Platform: Applied Biosystems (ABI) : **54 normal blood samples**
 
-```{r load, echo=FALSE, cache=TRUE, message=FALSE}
+```{r load, echo=FALSE, message=FALSE}
 source("R/c3.R")
 ```
 
 The merge of these datasets result in 6421 (common) genes and 510 samples (85 normal blood samples and 425 cancer tissue).
     
 ```{r, results="asis", message=FALSE}
-xtable(table(c3.data$Origin, c3.data$Study))
+print.xtable(xtable(table(c3.data$Origin, c3.data$Study)), comment=FALSE)
 ```
 
 ```{r plot, fig.path="figures/", cache=TRUE, fig.cap="2D (MDS) plot of the merged dataset"} 
