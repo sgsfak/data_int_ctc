@@ -1,0 +1,17 @@
+% The CTC saga: Results (C1, C2, C3 intersection)
+% Stelios Sfakianakis
+
+```{r setup, include=FALSE, cache=FALSE}
+opts_chunk$set(dpi=200, message=FALSE, warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+require(xtable)
+```
+
+The following tables shows the genes found in the intersection of the
+C1, C2, and C3 gene sets.
+
+```{r fint, cache=FALSE, echo=FALSE, results="asis"}
+source("R/cint.R")
+
+rownames(df) = NULL
+print(xtable(df), comment=FALSE)
+```
