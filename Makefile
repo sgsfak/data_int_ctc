@@ -12,7 +12,7 @@ download_files:
 
 .SUFFIXES: .pdf .md
 .md.pdf:
-	pandoc --latex-engine=/usr/texbin/pdflatex -s $< -o $@
+	pandoc -V geometry:margin=1in -s $< -o $@
 
 %.md : %.Rmd
 	Rscript -e "library(knitr); knit(\"$<\")"

@@ -56,3 +56,9 @@ siggenes.over <- list.siggenes(sam.out, delta)[w]
 ```
 
 We find `r num.genes.over` genes over-expressed in cancer samples.
+They can be found in the `c3_siggenes.txt` file.
+
+```{r writesiggenes, cache=FALSE, echo=FALSE}
+write.table(siggenes.over, file="c3_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
+

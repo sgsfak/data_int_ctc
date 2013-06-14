@@ -17,12 +17,3 @@ The code exists in the `R` folder and in the "source" `.Rmd` files. We are
 using the excellent [knitr](http://yihui.name/knitr/) package for
 transformation of the `Rmd` files to pdf. Therefore as the result of the `make`
 command a number of PDF files are produced -- one for each `Rmd` file.
-
-### Important note (13/06/2013)
-
-There seems that one of the datasets
-([GSE27562](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27562)) was
-updated just a couple of days ago (in June 7th). The result of this is that now
-the C2 comparison yields 103 overexpressed genes instead of 79 that was
-initially (in the paper) described!
-

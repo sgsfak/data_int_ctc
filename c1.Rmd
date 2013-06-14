@@ -146,7 +146,12 @@ siggenes.all <- list.siggenes(sam.out, dd)
 siggenes.over <- list.siggenes(sam.out, dd)[w]
 ```
 
-So there are `r num.genes.over` genes over-expressed in cancer state.
+So there are `r num.genes.over` genes over-expressed in cancer state. They can
+be found in the `c1_siggenes.txt` file.
+
+```{r writesiggenes, cache=FALSE, echo=FALSE}
+write.table(siggenes.over, file="c1_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
 
 
 [^1]: Wirapati, P.; Sotiriou, C.; Kunkel, S.; Farmer, P.; Pradervand, S.; Haibe-Kains, B.; Desmedt, C.; Ignatiadis, M.; Sengstag, T.; Schütz, F.; Goldstein, D. R.; Piccart, M. & Delorenzi, M. (2008), 'Meta-analysis of gene expression profiles in breast cancer: toward a unified understanding of breast cancer subtyping and prognosis signatures', Breast Cancer Res 10 (4) .
