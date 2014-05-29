@@ -1,15 +1,15 @@
 % The CTC saga: C1 comparison
 % Stelios Sfakianakis
-% Date: 2013/03/15
-
+% Date: `r format(Sys.Date(), '%Y-%m-%d')`
 
 ```{r setup, include=FALSE, cache=FALSE}
-opts_chunk$set(dpi=200, warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+opts_chunk$set(tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60), dpi=200, cache=TRUE, autodep=TRUE, dev="pdf", warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
 require(siggenes)
 require(inSilicoMerging)
 require(plyr)
 require(ggplot2)
 require(xtable)
+set.seed(53079239)
 ```
 
 # Datasets
@@ -124,13 +124,14 @@ sam.out <- sam(exprs(c1.data), cl, B=500, rand=0xDEAD);
 dd <- findDelta(sam.out, fdr=0.05, verbose=FALSE)[2,1]
 ```
 
-So by choosing `r dd` as our "delta" 
+
 ```{r diffg, cache=TRUE}
 sam.sum <- summary(sam.out, delta=dd)
 ee=exprs(c1.data)[sam.sum@row.sig.genes,]
 num.diff.exp = dim(ee)[1]
 ```
-we find `r num.diff.exp` differential expressed genes:
+
+So by choosing `r dd` as our "delta" we find `r num.diff.exp` differential expressed genes:
 
 ```{r samplot, fig.path="figures/", fig.cap="SAM plot", cache=TRUE}
 plot(sam.out, dd)
@@ -153,6 +154,9 @@ be found in the `c1_siggenes.txt` file.
 write.table(siggenes.over, file="c1_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
 ```
 
+```{r sessionInfo, include=TRUE, echo=TRUE, results='markup'}
+sessionInfo()
+```
 
 [^1]: Wirapati, P.; Sotiriou, C.; Kunkel, S.; Farmer, P.; Pradervand, S.; Haibe-Kains, B.; Desmedt, C.; Ignatiadis, M.; Sengstag, T.; Schütz, F.; Goldstein, D. R.; Piccart, M. & Delorenzi, M. (2008), 'Meta-analysis of gene expression profiles in breast cancer: toward a unified understanding of breast cancer subtyping and prognosis signatures', Breast Cancer Res 10 (4) .
 

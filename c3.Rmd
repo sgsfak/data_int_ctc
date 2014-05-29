@@ -1,13 +1,13 @@
 % The CTC saga: C3 comparison
 % Stelios Sfakianakis
-% Date: 2013/03/18
-
+% Date: `r format(Sys.Date(), '%Y-%m-%d')`
 
 ```{r setup, include=FALSE, cache=FALSE}
-    opts_chunk$set(dpi=200, warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+opts_chunk$set(tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60), dpi=200, cache=TRUE, autodep=TRUE, dev="pdf", warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
 require(siggenes)
 require(inSilicoMerging)
 require(xtable)
+set.seed(534224245)
 ```
 # C3 comparison
 
@@ -60,5 +60,10 @@ They can be found in the `c3_siggenes.txt` file.
 
 ```{r writesiggenes, cache=FALSE, echo=FALSE}
 write.table(siggenes.over, file="c3_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
+
+```{r sessionInfo, include=TRUE, results='markup', echo=TRUE}
+sessionInfo()
+
 ```
 

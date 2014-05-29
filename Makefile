@@ -1,12 +1,18 @@
 SERIES = 16443 18672 19783 22820 27562 31364 9574
 GSE = $(patsubst %,data/gse%.rda,$(SERIES))
 
-all: $(GSE) c1.pdf c2.pdf c3.pdf results.pdf
+COMPARISONS = c1 c2 c3
+PDFS = $(patsubst %, %.pdf, $(COMPARISONS))
+MDS = $(patsubst %, %.md, $(COMPARISONS))
+
+
+all: $(GSE) $(PDFS) results.pdf
 
 $(GSE): R/get_data.R
 $(GSE): download_files
 	
-.SECONDARY: download_files
+.SECONDARY: download_files $(MDS)
+.PHONY: clean cacheclean
 download_files:
 	Rscript --vanilla -e 'source("R/get_data.R");get_data()'
 
@@ -16,3 +22,9 @@ download_files:
 
 %.md : %.Rmd
 	Rscript -e "library(knitr); knit(\"$<\")"
+
+clean:
+	rm -rf $(PDFS)
+
+cacheclean: clean
+	rm -rf cache

@@ -1,9 +1,13 @@
 % The CTC saga: C2 comparison
 % Stelios Sfakianakis
-
+% Date: `r format(Sys.Date(), '%Y-%m-%d')`
 
 ```{r setup, include=FALSE, cache=FALSE}
-opts_chunk$set(tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60), dpi=200, prompt=TRUE, comment=NA, warning=FALSE, upload.fun=imgur_upload)
+opts_chunk$set(tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60),dpi=200, cache=TRUE, autodep=TRUE, dev="pdf", warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+require(siggenes)
+require(inSilicoMerging)
+require(xtable)
+set.seed(308263223)
 ```
 
 This is the comparison between peripheral blood of cancer patients and normal individuals, which identifies genes expressed in cancer blood. We are using the following datasets:
@@ -14,11 +18,7 @@ This is the comparison between peripheral blood of cancer patients and normal in
 
 
 Loading the data and performing the merge:
-```{r load, cache=TRUE, message=FALSE}
-require(inSilicoMerging)
-require(siggenes)
-require(xtable)
-
+```{r load, message=FALSE}
 load("data/gse27562_c2.rda")
 load("data/gse16443.rda")
 datasets = list(GSE27562=gse27562, GSE16443=gse16443)
@@ -27,8 +27,10 @@ mgse_COMBAT <- merge(datasets, method="COMBAT");
 
 
 We select the samples to be used for this comparison:
-```{r samplesel, cache=TRUE,  message=FALSE}
-ind <- gse27562$characteristics_ch1=='phenotype: Normal' | gse27562$characteristics_ch1=='phenotype: Malignant' | gse27562$characteristics_ch1=='phenotype: Pre-Surgery (aka Malignant)'
+```{r samplesel, message=FALSE}
+ind <- gse27562$characteristics_ch1=='phenotype: Normal' |
+    gse27562$characteristics_ch1=='phenotype: Malignant' | 
+    gse27562$characteristics_ch1=='phenotype: Pre-Surgery (aka Malignant)'
 gse27562_samples = sampleNames(gse27562[,ind])
 gse16443_samples = sampleNames(gse16443)
 
@@ -37,17 +39,18 @@ c2.data = mgse_COMBAT[,samples]
 ```
 
 The distribution of the samples is shown in Table 1.
+
 ```{r xtable, echo=FALSE, results="asis"}
 print.xtable(xtable(table(c2.data$Disease, c2.data$Study), caption="Sample distribution", label="tab:dist"), comment=FALSE)
 ```
 
 And the distribution of samples in a 2D MDS plot are shown in Figure 1.
 
-```{r plot, echo=TRUE, cache=TRUE, fig.cap="MDS plot of the merged samples", dev="pdf"}
+```{r plot, echo=TRUE, fig.cap="MDS plot of the merged samples", dev="pdf"}
 plotMDS(c2.data, "Study", "Disease")
 ```
 
-```{r diff, cache=TRUE}
+```{r diff}
 cl = ifelse(c2.data$Disease == 'Control', 0, 1)
 sam.out <- sam(exprs(c2.data), cl, B=500, rand=0xDEAD);
 summary(sam.out);
@@ -73,5 +76,9 @@ They can be found in the `c2_siggenes.txt` file.
 
 ```{r writesiggenes, cache=FALSE, echo=FALSE}
 write.table(siggenes.over, file="c2_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
+
+```{r sessionInfo, include=TRUE, echo=TRUE, results='markup'}
+sessionInfo()
 ```
 
