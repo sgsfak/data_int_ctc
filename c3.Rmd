@@ -13,10 +13,9 @@ set.seed(534224245)
 
 This is the comparison between cancer tissue and normal blood. We are using the cancer tissue samples from the c1 comparison, i.e.:
 
-- [GSE22820](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE22820):"Gene expression profiles were generated from **176** primary breast cancer patients and 12 normal breast samples", PMID: 21356353 (*Agilent Whole Human Genome Microarray 4x44K G4112F*): **176 cancer tissues** (we don't take 2 metastatic cancers)
-- [GSE19783](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE19783):"mRNA profiling from **115** breast cancer samples was performed", PMID: 21364938 (*Agilent Whole Human Genome Microarray 4x44K G4112F*) : **113 cancer tissues**
+- [GSE22820](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE22820):"Gene expression profiles were generated from **176** primary breast cancer patients and 12 normal breast samples", PMID: 21356353 (*Agilent Whole Human Genome Microarray 4x44K G4112F*): **176 cancer tissues**
+- [GSE19783](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE19783):"mRNA profiling from **115** breast cancer samples was performed", PMID: 21364938 (*Agilent Whole Human Genome Microarray 4x44K G4112F*) : **113 cancer tissues** (we don't take 2 metastatic cancers)
 - [GSE31364](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE31364):"Seventy-two primary breast cancer tumor have been analyzed against a breast cancer reference pool.", PMID: 22384245 (*Agendia_human_DiscoverPrint_v1* **custom platform**) : **72 cancer tissues**
-- [GSE18672](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE18672): "Mammographic density and genetics - A study of breast biopsies in relation to mammoraphic density", PMID: 20799965 (Agilent Whole Human Genome Oligo Microarray G4112A): **64 cancer tissues**
 
 Furthermore we are using the following datasets providing cancer samples:
 
