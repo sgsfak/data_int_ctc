@@ -38,6 +38,12 @@ samples = c(gse16443_samples, gse27562_samples)
 c2.data = mgse_COMBAT[,samples]
 ```
 
+Let's cache the dataset for subsequent analyses:
+
+```{r save_dataset, cache=FALSE}
+saveRDS(c2.data, file=file.path("intermediate", "c2.data.rds"))
+```
+
 The distribution of the samples is shown in Table 1.
 
 ```{r xtable, echo=FALSE, results="asis"}
@@ -62,6 +68,10 @@ num.genes.over <- length(w)
 num.genes.over
 ```
 
+```{r save_sam, cache=FALSE, echo=FALSE}
+saveRDS(sam.out, file=file.path("intermediate", "c2.sam.rds"))
+```
+
 So we find `r num.genes.over` genes overexpressed in cancer peripheral blood.
 
 ```{r siggenes, echo=FALSE, cache=TRUE}
@@ -76,6 +86,9 @@ They can be found in the `c2_siggenes.txt` file.
 
 ```{r writesiggenes, cache=FALSE, echo=FALSE}
 write.table(siggenes.over, file="c2_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
+```{r writesiggenes2, cache=FALSE, echo=FALSE}
+write.table(sam.sum@mat.sig, file="c2_all_siggenes.txt", quote=FALSE, row.names=TRUE, col.names=TRUE)
 ```
 
 ```{r sessionInfo, include=TRUE, echo=TRUE, results='markup'}

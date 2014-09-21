@@ -114,6 +114,11 @@ dim(c1.data);
 table(c1.data$Disease);
 ```
 
+Let's cache the dataset for subsequent analyses:
+
+```{r save_dataset, cache=FALSE}
+saveRDS(c1.data, file=file.path("intermediate", "c1.data.rds"))
+```
 ## Gene selection
 
 I am using [Significance Analysis of Microarrays](http://www-stat.stanford.edu/~tibs/SAM/) (SAM) for finding differential expressed genes. We try to select the differentially expressed genes so that the estimated False Discovery Rate (FDR) to be bounded by `0.05` (i.e. to expect 1% falsely assumed differentially expressed genes): 
@@ -124,6 +129,9 @@ sam.out <- sam(exprs(c1.data), cl, B=500, rand=0xDEAD);
 dd <- findDelta(sam.out, fdr=0.05, verbose=FALSE)[2,1]
 ```
 
+```{r save_sam, cache=FALSE, echo=FALSE}
+saveRDS(sam.out, file=file.path("intermediate", "c1.sam.rds"))
+```
 
 ```{r diffg, cache=TRUE}
 sam.sum <- summary(sam.out, delta=dd)
@@ -152,6 +160,9 @@ be found in the `c1_siggenes.txt` file.
 
 ```{r writesiggenes, cache=FALSE, echo=FALSE}
 write.table(siggenes.over, file="c1_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
+```{r writesiggenes2, cache=FALSE, echo=FALSE}
+write.table(sam.sum@mat.sig, file="c1_all_siggenes.txt", quote=FALSE, row.names=TRUE, col.names=TRUE)
 ```
 
 ```{r sessionInfo, include=TRUE, echo=TRUE, results='markup'}

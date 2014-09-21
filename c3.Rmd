@@ -41,6 +41,12 @@ print.xtable(xtable(table(c3.data$Origin, c3.data$Study)), comment=FALSE)
 plotMDS(c3.data, "Study", "Origin", main="Distribution of samples in the merged datasets")
 ```
 
+Let's save the dataset for subsequent analyses:
+
+```{r save_dataset, cache=FALSE}
+saveRDS(c3.data, file=file.path("intermediate", "c3.data.rds"))
+```
+
 ## Differential expression
 
 ```{r diff, cache=TRUE}
@@ -54,11 +60,18 @@ num.genes.over <- length(w)
 siggenes.over <- list.siggenes(sam.out, delta)[w]
 ```
 
+```{r save_sam, cache=FALSE, echo=FALSE}
+saveRDS(sam.out, file=file.path("intermediate", "c3.sam.rds"))
+```
+
 We find `r num.genes.over` genes over-expressed in cancer samples.
 They can be found in the `c3_siggenes.txt` file.
 
 ```{r writesiggenes, cache=FALSE, echo=FALSE}
 write.table(siggenes.over, file="c3_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
+```{r writesiggenes2, cache=FALSE, echo=FALSE}
+write.table(sam.sum@mat.sig, file="c3_all_siggenes.txt", quote=FALSE, row.names=TRUE, col.names=TRUE)
 ```
 
 ```{r sessionInfo, include=TRUE, results='markup', echo=TRUE}
