@@ -8,7 +8,6 @@ require(siggenes)
 require(inSilicoMerging)
 require(plyr)
 require(ggplot2)
-require(xtable)
 set.seed(53079239)
 ```
 
@@ -108,7 +107,7 @@ The distribution of the different classes in the initial datasets is shown in th
 table:
 
 ```{r distr, results="asis", echo=FALSE}
-print.xtable(xtable(table(mgse_COMBAT$Disease, mgse_COMBAT$Study)), comment=FALSE)
+kable(table(mgse_COMBAT$Disease, mgse_COMBAT$Study))
 ```
 
 For each dataset we keep specific samples in the final (merged) dataset.
@@ -133,7 +132,7 @@ pData(c4.data)$Disease <- factor(c4.data$Disease)
 After the selection of samples their distribution is as follows:
 
 ```{r distr2, results="asis", echo=FALSE}
-print.xtable(xtable(table(c4.data$Disease, c4.data$Study)), comment=FALSE)
+kable(table(c4.data$Disease, c4.data$Study))
 ```
 
 We can compare the output (how the different data sets are mixed together) by
@@ -243,7 +242,6 @@ while in the table below  are the genes in the old intersection of C1, C2, C3 th
 
 ```{r diff2, results='asis', echo=FALSE}
 kable(ez_to_genes(setdiff(old.common, common)), row.names=FALSE)
-#print.xtable(xtable(ez_to_genes(setdiff(old.common, common))), include.rownames=FALSE, comment=FALSE)
 ```
 
 

@@ -23,6 +23,9 @@ download_files:
 %.md : %.Rmd
 	Rscript -e "library(knitr); knit(\"$<\")"
 
+%.html : %.Rmd
+	Rscript -e "library(knitr); knit2html(\"$<\")"
+
 clean:
 	rm -rf $(PDFS)
 
