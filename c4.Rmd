@@ -1,0 +1,254 @@
+% The CTC saga: C4 comparison
+% Stelios Sfakianakis
+% Date: `r format(Sys.Date(), '%Y-%m-%d')`
+
+```{r setup, include=FALSE, cache=FALSE}
+opts_chunk$set(tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60), dpi=200, cache=TRUE, autodep=TRUE, dev="pdf", warning=FALSE, prompt=TRUE, comment=NA, upload.fun=imgur_upload)
+require(siggenes)
+require(inSilicoMerging)
+require(plyr)
+require(ggplot2)
+require(xtable)
+set.seed(53079239)
+```
+
+# Datasets
+C4 is the comparison between cancer blood and normal tissue. We will merge an
+number of datasets to create a big one and then perform common differential
+expression algorithms.
+
+For the normal tissue samples we take the following datasets from the C1 comparison:
+
+- [GSE22820](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE22820):
+  “Gene expression profiles were generated from 176 primary breast
+  cancer patients and 12 normal breast samples”, PMID: 21356353
+  (*Agilent Whole Human Genome Microarray 4x44K G4112F*). The GEO
+  dataset contains **176 primary breast cancer** and **10 normal
+  patients**.
+
+- [GSE9574](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE9574):
+  "Gene expression abnormalities in histologically normal breast
+  epithelium of breast cancer patients", PMID: 18058819
+  (*Affymetrix Human Genome U133A Array*). We selected **15 normal
+  samples** that have been identified as "disease-state: normal
+  (reduction mammoplasty)"
+
+- [GSE18672](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE18672):
+  "Mammographic density and genetics - A study of breast biopsies
+  in relation to mammoraphic density", PMID: 20799965 (Agilent
+  Whole Human Genome Oligo Microarray G4112A). Here we used the
+  the **79 women with no malignancy** (healthy women)
+
+Additionally the following datasets from the C2 comparison are used for the cancer blood samples:
+
+- [GSE27562](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE27562): "In
+  total, we collected blood from **57** women with a diagnosis of breast cancer
+  and **37** with a benign diagnosis"  (PMID:
+  [21781289](http://www.ncbi.nlm.nih.gov/pubmed/21781289)) Platform: Affymetrix
+
+- [GSE16443](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16443):
+  "Blood samples were collected from **121** females referred for diagnostic
+  mammography following an initial suspicious screening mammogram. Diagnostic
+  work-up revealed that **67** of these women had breast cancer while **54**
+  had no malignant disease. Additionally, 9 samples from 6 healthy female
+  controls (three pregnant women, one breast-feeding woman and two healthy
+  controls at different timepoints in their menstrual cycle) were included."
+  (PMID: [20078854](http://www.ncbi.nlm.nih.gov/pubmed/20078854)). Platform:
+  Applied Biosystems (ABI)
+
+
+
+## Filtering Genes per Dataset
+
+A "non specific" filtering is performed in each data set:
+
+```{r, eval=FALSE}
+nsFilter(gse, require.entrez=TRUE,remove.dupEntrez=TRUE,
+             var.func=IQR, var.cutoff=0.5, var.filter=FALSE)
+
+```
+
+where `gse` is the dataset. This means that probes/transcripts that do not map in Entrez genes identifiers are removed and in the case that multiple probes map to the same identifier we remove all but one that has the largest IQR (i.e. the largest variance).
+
+Now loading the data and performing the merge:
+
+```{r load, echo=FALSE}
+load("data/gse22820.rda")
+load("data/gse9574.rda")
+load("data/gse18672.rda")
+
+pData(gse22820)$Disease = ifelse(pData(gse22820)$characteristics_ch1=="disease state: normal breast tissue", "Control Tissue", "Cancer")
+pData(gse18672)$Disease = ifelse(pData(gse18672)$characteristics_ch1.1=="clinical characteristic/disease status: breast tumor", "Cancer","Control Tissue")
+pData(gse9574)$Disease = ifelse(pData(gse9574)$characteristics_ch1 == 'disease-state: normal (reduction mammoplasty)', "Control Tissue", "Cancer")
+
+pData(gse22820)$Origin <- 'tissue'
+pData(gse18672)$Origin <- 'tissue'
+pData(gse9574)$Origin <- 'tissue'
+
+load("data/gse27562_c2.rda")
+load("data/gse16443.rda")
+
+pData(gse27562)$Origin <- 'blood'
+pData(gse16443)$Origin <- 'blood'
+
+datasets = list(GSE9574=gse9574, GSE18672=gse18672, GSE22820=gse22820, GSE27562=gse27562, GSE16443=gse16443)
+```
+
+# Merging
+
+I am using the [inSilicoMerging](http://www.bioconductor.org/packages/2.11/bioc/html/inSilicoMerging.html) package of Bioconductor that features some of the most well known cross platform normalization methods (COMBAT is [Empirical Bayes](http://biostatistics.oxfordjournals.org/content/8/1/118.abstract), DWD stands for [Distance Weighted Discrimination](http://bioinformatics.oxfordjournals.org/content/20/1/105.short), and  GENENORM means gene "z-score" normalization) for the merger of these datasets:
+
+```{r merging, cache=TRUE, results="hide", message=FALSE}
+require(inSilicoMerging)
+mgse_COMBAT <- merge(datasets, method="COMBAT");
+
+```
+
+The distribution of the different classes in the initial datasets is shown in the next 
+table:
+
+```{r distr, results="asis", echo=FALSE}
+print.xtable(xtable(table(mgse_COMBAT$Disease, mgse_COMBAT$Study)), comment=FALSE)
+```
+
+For each dataset we keep specific samples in the final (merged) dataset.
+
+```{r samplesel, cache=TRUE}
+ind1 = grep("Malignant", gse27562$characteristics_ch1)
+gse27562_samples = sampleNames(gse27562[,ind1])
+ind2 = grep("Cancer", gse16443$Disease)
+gse16443_samples = sampleNames(gse16443[,ind2])
+
+blood_samples = c(gse16443_samples, gse27562_samples)
+
+idx = mgse_COMBAT$Disease == 'Control Tissue'
+tissue_samples = sampleNames(mgse_COMBAT[,idx])
+
+samples = c(blood_samples, tissue_samples)
+
+c4.data = mgse_COMBAT[,samples]
+pData(c4.data)$Disease <- factor(c4.data$Disease)
+```
+
+After the selection of samples their distribution is as follows:
+
+```{r distr2, results="asis", echo=FALSE}
+print.xtable(xtable(table(c4.data$Disease, c4.data$Study)), comment=FALSE)
+```
+
+We can compare the output (how the different data sets are mixed together) by
+computing a [Multidimensional
+Scaling](http://en.wikipedia.org/wiki/Multidimensional_scaling) (MDS) plot:
+
+```{r mds_c4_plot, fig.path="figures/", cache=TRUE, fig.cap="2D (MDS) plot of the merged dataset"} 
+plotMDS(c4.data,  "Disease", "Study", main="Distribution of samples in the merged datasets")
+```
+
+The plot is shown in Figure 1. 
+
+After the merging and selection of samples what is the proportion of normal versus tumor cases?
+
+```{r prop, cache=TRUE}
+dim(c4.data);
+table(c4.data$Disease);
+```
+
+Let's cache the dataset for subsequent analyses:
+
+```{r save_dataset, cache=FALSE}
+saveRDS(c4.data, file=file.path("intermediate", "c4.data.rds"))
+```
+## Gene selection
+
+I am using [Significance Analysis of Microarrays](http://www-stat.stanford.edu/~tibs/SAM/) (SAM) for finding differential expressed genes. We try to select the differentially expressed genes so that the estimated False Discovery Rate (FDR) to be bounded by `0.05` (i.e. to expect 5% falsely assumed differentially expressed genes): 
+
+```{r sam, cache=TRUE}
+cl = ifelse(c4.data$Disease == 'Control Tissue', 0, 1)
+sam.out <- sam(exprs(c4.data), cl, B=1000, rand=0xDEAD);
+dd <- findDelta(sam.out, fdr=0.05, verbose=FALSE)[2,1]
+```
+
+```{r save_sam, cache=FALSE, echo=FALSE}
+saveRDS(sam.out, file=file.path("intermediate", "c4.sam.rds"))
+```
+
+```{r diffg, cache=TRUE}
+sam.sum <- summary(sam.out, delta=dd)
+ee=exprs(c4.data)[sam.sum@row.sig.genes,]
+num.diff.exp = dim(ee)[1]
+```
+
+So by choosing `r dd` as our "delta" we find `r num.diff.exp` differential expressed genes:
+
+```{r samplot, fig.path="figures/", fig.cap="SAM plot", cache=TRUE}
+plot(sam.out, dd)
+```
+
+Let's find out which of the genes are over-expressed in cancer samples:
+
+```{r overexp, cache=TRUE}
+w <- which(sam.sum@mat.sig$d.value > 0)
+num.genes.over <- length(w)
+num.genes.over
+siggenes.all <- list.siggenes(sam.out, dd)
+siggenes.over <- list.siggenes(sam.out, dd)[w]
+```
+
+So there are `r num.genes.over` genes over-expressed in cancer state. They can
+be found in the `c4_siggenes.txt` file.
+
+```{r writesiggenes, cache=FALSE, echo=FALSE}
+write.table(siggenes.over, file="c4_siggenes.txt", quote=FALSE, row.names=FALSE, col.names=FALSE)
+```
+```{r writesiggenes2, cache=FALSE, echo=FALSE}
+write.table(sam.sum@mat.sig, file="c4_all_siggenes.txt", quote=FALSE, row.names=TRUE, col.names=TRUE)
+```
+
+
+## Common genes with C1, C2
+
+```{r prepare_common}
+ez_to_genes <- function(ez) {
+    require(org.Hs.eg.db)
+    cl <- mget(as.character(ez), org.Hs.egSYMBOL)
+
+    m <- sapply(cl, function(x) x[[1]])
+    df <- data.frame(ezgene=names(m), symbol=m)
+    df
+}
+
+c1 <- read.table("c1_siggenes.txt",col.names="g")$g
+c2 <- read.table("c2_siggenes.txt",col.names="g")$g
+c3 <- read.table("c3_siggenes.txt",col.names="g")$g
+c4 <- read.table("c4_siggenes.txt",col.names="g")$g
+
+old.common <- intersect(c1, intersect(c2, c3))
+common <- intersect(c1, intersect(c2, c4))
+```
+
+The following are the common genes between C1, C2, and C4:
+
+```{r common, results='asis'}
+kable(ez_to_genes(common), row.names=FALSE)
+```
+
+
+The following are the "new" genes not contained in the old intersection of C1, C2, C3:
+
+```{r diff1, results='asis', echo=FALSE}
+kable(ez_to_genes(setdiff(common, old.common)), row.names=FALSE)
+```
+
+while in the table below  are the genes in the old intersection of C1, C2, C3 that are removed from the new intersection:
+
+```{r diff2, results='asis', echo=FALSE}
+kable(ez_to_genes(setdiff(old.common, common)), row.names=FALSE)
+#print.xtable(xtable(ez_to_genes(setdiff(old.common, common))), include.rownames=FALSE, comment=FALSE)
+```
+
+
+### Session information
+
+```{r sessionInfo, include=TRUE, echo=TRUE, results='markup'}
+sessionInfo()
+```
