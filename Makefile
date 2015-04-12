@@ -26,6 +26,15 @@ download_files:
 %.html : %.Rmd
 	Rscript -e "library(knitr); knit2html(\"$<\")"
 
+c123_common_siggenes.txt: c1_siggenes.txt c2_siggenes.txt c3_siggenes.txt
+	cat $^ | sort | uniq -c | awk '$$1==3{print $$2}' > $@
+
+c124_common_siggenes.txt: c1_siggenes.txt c2_siggenes.txt c4_siggenes.txt
+	cat $^ | sort | uniq -c | awk '$$1==3{print $$2}' > $@
+
+union_c123_c124_siggenes.txt: c123_common_siggenes.txt c124_common_siggenes.txt
+	cat $^ | sort | uniq > $@
+
 clean:
 	rm -rf $(PDFS)
 
